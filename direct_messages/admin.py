@@ -12,3 +12,6 @@ class ChattingRoomAdmin(admin.ModelAdmin):
 class MessageAdmin(admin.ModelAdmin):
     list_display = ("text", "user", "room", "created_at")
     list_filter = ("created_at",)
+    
+    
+    
