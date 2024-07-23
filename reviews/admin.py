@@ -17,10 +17,8 @@ class WordFilter(admin.SimpleListFilter):
         if word:
             return reviews.filter(payload__contains=word)
         else:
-            reviews
+            reviews 
     
-    
-
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
