@@ -1,20 +1,49 @@
-from django.shortcuts import render
-from django.http import HttpResponse
-from .models import Room
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.exceptions import NotFound
+from rest_framework.status import HTTP_204_NO_CONTENT
+from .models import Amenity
+from .serializers import AmenitySerializer
 
-# Create your views here.
-def see_all_rooms(request):
-    rooms = Room.objects.all()  # 모든 방을 검색 
-    return render(request, "all_rooms.html", {'rooms': rooms, 
-                                              'title': "hello, this title comes from django"})
-    # render 함수에 템플릿 이름을 적어둠 
+class Amenities(APIView):
+    def get(self, request):
+        all_amenities = Amenity.objects.all()
+        serializer = AmenitySerializer(all_amenities, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = AmenitySerializer(data=request.data)
+        if serializer.is_valid():
+            amenity = serializer.save()
+            return Response(AmenitySerializer(amenity).data,)
+        else:
+            return Response(serializer.errors)
+
+
+class AmenityDetail(APIView):
+    def get_object(self, pk):
+        try:
+            return Amenity.objects.get(pk=pk)
+        except Amenity.DoesNotExist:
+            raise NotFound
     
-# request object 제공: 누가 이 페이지를 요청하고, 어떤 데이터가 전송되고 있는지 등을 알 수 있다 
-
-def see_one_room(request, room_pk):
-    try:
-        room = Room.objects.get(pk=room_pk)  # room_pk에 해당하는 room을 DB에서 찾는다 
-        return render(request, "room_detail.html", {'room':room,},)  # 위 DB를 템플릿으로 렌더링한다 
-    except Room.DoesNotExist:
-        return render(request, "room_detail.html", {'not_found': True,},)
-    # DoesNotExist 에러가 발생하면: room_detail.html의 'not_found'로 렌더링
+    
+    def get(self, request, pk):
+        amenity = self.get_object(pk)
+        serializer = AmenitySerializer(amenity)
+        return Response(serializer.data)
+    
+    def put(self, request, pk):
+        amenity = self.get_object(pk)
+        serializer = AmenitySerializer(amenity, data=request.data, partial=True,)
+        # (데이터베이스의 amenity, user가 보낸 데이터, 부분업데이트라는 것을 알림)
+        if serializer.is_valid():
+            updated_amenity = serializer.save()
+            return Response(AmenitySerializer(updated_amenity).data,)
+        else:
+            return Response(serializer.errors)
+    
+    def delete(self, request, pk):
+        amenity = self.get_object(pk)
+        amenity.delete()
+        return Response(status=HTTP_204_NO_CONTENT)

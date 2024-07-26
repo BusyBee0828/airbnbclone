@@ -19,10 +19,15 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('rooms/', include("rooms.urls")),
+    path('api/v1/rooms/', include("rooms.urls")),
     # 누가 'rooms/~~'로 접속하면: rooms의 urls.py의 파일을 살펴봐라
-    path('categories/', include('categories.urls'))
+    
+    path('api/v1/categories/', include('categories.urls')),
+    # api를 제공하는 url 임을 명시 
+    
+    # 작업할 때마다 새로운 버전을 만들어서 저장
 ]
+
 
 
 
