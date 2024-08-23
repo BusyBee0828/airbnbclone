@@ -145,3 +145,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Auth
 AUTH_USER_MODEL = 'users.User'
 
+MEDIA_ROOT = "uploads"  # media가 저장될 폴더 생성
+
+MEDIA_URL = "user-uploads/"  
+
+PAGE_SIZE = 3  # rooms > views.py 의 RoomReviews 클래스
+
+

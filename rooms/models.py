@@ -27,6 +27,7 @@ class Room(CommonModel):
     category = models.ForeignKey("categories.Category", null=True, blank=True, on_delete=models.SET_NULL, related_name='rooms')
     # on_delete=models.SET_NULL: category가 없어져도 Experience는 그대로 있다 
     
+    
     def __str__(self) -> str:
         return self.name
     # Room을 등록했을 때, 'name'이 str로 나타나게한다 
