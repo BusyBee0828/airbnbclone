@@ -17,7 +17,7 @@ class User(AbstractUser):  # AbstractUser에서 상속받아 User 클래스를 �
     
     first_name = models.CharField(max_length=150, editable=False)
     last_name = models.CharField(max_length=150, editable=False)
-    avatar = models.ImageField(blank=True)   # blank=True: 이미지 첨부가 필수가 X 
+    avatar = models.URLField(blank=True)   # blank=True: 이미지 첨부가 필수가 X 
     name = models.CharField(max_length=150, default="")
     is_host = models.BooleanField(null=True)
     gender = models.CharField(max_length=10, choices=GenderChoices.choices)

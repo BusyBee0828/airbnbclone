@@ -1,15 +1,18 @@
+from django.db import transaction
+from django.conf import settings
+from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound, NotAuthenticated, ParseError, PermissionDenied
 from rest_framework.status import HTTP_204_NO_CONTENT
-from django.db import transaction
-from .models import Amenity, Room
-from categories.models import Category
-from .serializers import AmenitySerializer, RoomListSerializer, RoomDetailSerializer
-from reviews.serializers import ReviewSerializer
-from django.conf import settings
-from medias.serializers import PhotoSerializer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from .serializers import AmenitySerializer, RoomListSerializer, RoomDetailSerializer
+from .models import Amenity, Room
+from reviews.serializers import ReviewSerializer
+from medias.serializers import PhotoSerializer
+from categories.models import Category
+from bookings.models import Booking
+from bookings.serializers import PublicBookingSerializer, CreateRoomBookingSerializer
 
 class Amenities(APIView):
     def get(self, request):
@@ -211,3 +214,41 @@ class RoomPhotos(APIView):
             return Response(serializer.data)
         else:
             return Response(serializer.errors)
+        
+
+class RoomBookings(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    
+    def get_object(self, pk):
+        try:
+            return Room.objects.get(pk=pk)
+        except:
+            raise NotFound
+    
+    def get(self, request, pk):
+        room = self.get_object(pk)
+        now = timezone.localtime(timezone.now()).date()
+        bookings = Booking.objects.filter(room=room, kind=Booking.BookingKindChoices.ROOM, check_in__gt=now,)
+        # check_in__gt=now: 체크인이 now보다 큰 경우만 필터링
+        serializer = PublicBookingSerializer(bookings, many=True)
+        return Response(serializer.data)
+    
+    def post(self, request, pk):
+        room = self.get_object(pk)
+        serializer = PublicBookingSerializer(data=request.data)
+        if serializer.is_valid():
+            pass
+        else:
+            return Response(serializer.errors)
+
+    def post(self, request, pk):
+        room = self.get_object(pk)
+        serializer = CreateRoomBookingSerializer(data=request.data)
+        if serializer.is_valid():
+            booking = serializer.save(room=room, user=request.user,kind=Booking.BookingKindChoices.ROOM,)
+            serializer = PublicBookingSerializer(booking)
+            return Response(serializer.data)
+        # is_valid(): 미래의 날짜만 체크인할 수 있다는 것을 할 줄 모르기 때문에 validation을 customize해서 추가해야
+        else:
+            return Response(serializer.errors)
+        # bookings의 모델에서는 only "guests" is required 

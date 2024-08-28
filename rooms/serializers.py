@@ -5,6 +5,7 @@ from reviews.serializers import ReviewSerializer
 from categories.serializers import CategorySerializer
 from rest_framework import serializers
 from medias.serializers import PhotoSerializer
+from wishlists.models import Wishlist
 
 class AmenitySerializer(ModelSerializer):
     class Meta:
@@ -36,6 +37,7 @@ class RoomDetailSerializer(serializers.ModelSerializer):
     
     rating = serializers.SerializerMethodField()
     is_owner = serializers.SerializerMethodField()
+    is_liked = serializers.SerializerMethodField()  # 위시리스트에서 '좋아요' 
     photos = PhotoSerializer(many=True, read_only=True)
     
     class Meta:
@@ -48,3 +50,8 @@ class RoomDetailSerializer(serializers.ModelSerializer):
     def get_is_owner(self, room):
         request = self.context['request']
         return room.owner == request.user
+    
+    def get_is_liked(self, room):
+        request = self.context['request']
+        return Wishlist.objects.filter(user=request.user, rooms__pk=room.pk,).exists()
+        # 예를 들어, room name이 'Apartment in Seoul'인 room이 들어있는 위시리스트를 필터링할 수 있다
