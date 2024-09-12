@@ -4,7 +4,7 @@ from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound, NotAuthenticated, ParseError, PermissionDenied
-from rest_framework.status import HTTP_204_NO_CONTENT
+from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from .serializers import AmenitySerializer, RoomListSerializer, RoomDetailSerializer
 from .models import Amenity, Room
@@ -26,7 +26,7 @@ class Amenities(APIView):
             amenity = serializer.save()
             return Response(AmenitySerializer(amenity).data,)
         else:
-            return Response(serializer.errors)
+            return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
 class AmenityDetail(APIView):
     def get_object(self, pk):
@@ -48,7 +48,7 @@ class AmenityDetail(APIView):
             updated_amenity = serializer.save()
             return Response(AmenitySerializer(updated_amenity).data,)
         else:
-            return Response(serializer.errors)
+            return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
     
     def delete(self, request, pk):
         amenity = self.get_object(pk)
@@ -96,7 +96,7 @@ class Rooms(APIView):
                 raise ParseError("Amenity not found")
             
         else:
-            return Response(serializer.errors)
+            return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
 class RoomDetail(APIView):
     
@@ -150,7 +150,7 @@ class RoomDetail(APIView):
                 print(e)
                 raise ParseError("amenity not found")
         else:
-            return Response(serializer.errors)
+            return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
             
     def delete(self, request, pk):
         room = self.get_object(pk)
@@ -213,7 +213,7 @@ class RoomPhotos(APIView):
             serializer = PhotoSerializer(photo)
             return Response(serializer.data)
         else:
-            return Response(serializer.errors)
+            return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
         
 
 class RoomBookings(APIView):
@@ -239,7 +239,7 @@ class RoomBookings(APIView):
         if serializer.is_valid():
             pass
         else:
-            return Response(serializer.errors)
+            return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
     def post(self, request, pk):
         room = self.get_object(pk)
@@ -250,5 +250,5 @@ class RoomBookings(APIView):
             return Response(serializer.data)
         # is_valid(): 미래의 날짜만 체크인할 수 있다는 것을 할 줄 모르기 때문에 validation을 customize해서 추가해야
         else:
-            return Response(serializer.errors)
+            return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
         # bookings의 모델에서는 only "guests" is required 

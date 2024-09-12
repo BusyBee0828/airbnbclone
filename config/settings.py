@@ -11,16 +11,23 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+import os
+import environ
+
+env = environ.Env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+environ.Env.read_env(os.path.join(BASE_DIR, "airbnbclone", ".env"))
+
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-1hj1j((u*uhb$f+msmp)f@5#cchubwt1a$n_mg1$_skfz-qr=h'
+SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -54,6 +61,7 @@ CUSTOM_APPS = [
 
 THIRD_PARTY_APPS = [
     'rest_framework',
+    'rest_framework.authtoken'
 ]
 
 INSTALLED_APPS = SYSTEM_APPS + CUSTOM_APPS + THIRD_PARTY_APPS
@@ -150,5 +158,10 @@ MEDIA_ROOT = "uploads"  # media가 저장될 폴더 생성
 MEDIA_URL = "user-uploads/"  
 
 PAGE_SIZE = 3  # rooms > views.py 의 RoomReviews 클래스
+
+REST_FRAMEWORK = {'DEFAULT_AUTHENTICATION_CLASSES': ['rest_framework.authentication.SessionAuthentication',
+                                                     'config.authentication.TrustMeBroAuthentication',
+                                                     'rest_framework.authentication.TokenAuthentication',
+                                                     'config.authentication.JWTAuthentication',]}
 
 
